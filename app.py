@@ -18,7 +18,7 @@ st.write("Enter the facility information to estimate whether energy usage is nor
 MODELS_DIR = "models"
 model = joblib.load(f"{MODELS_DIR}/isolation_forest_model.pkl")
 scaler = joblib.load(f"{MODELS_DIR}/scaler.pkl")
-fuel_defaults = joblib.load(f"{MODELS_DIR}/fuel_defaults.pkl")   # {fuel: {MMBtu: x, GWht: y}}
+fuel_defaults = joblib.load(f"{MODELS_DIR}/fuel_defaults.pkl")    # {fuel: {MMBtu: x, GWht: y}}
 
 
 # FEATURE LIST
@@ -149,21 +149,27 @@ GWht = st.number_input(
 )
 
 
-# BUILDING ROW FOR MODEL
-row = pd.DataFrame(columns=all_features, dtype=object) 
-row.loc[0] = 0
-
-# Adding values into row
-row.at[0, "FACILITY_ID"] = 0
-row.at[0, "REPORTING_YEAR"] = REPORTING_YEAR
-row.at[0, "PRIMARY_NAICS_CODE"] = NAICS
-row.at[0, "COGENERATION_UNIT_EMISS_IND"] = cogen
-row.at[0, "MMBtu_TOTAL"] = MMBtu
-row.at[0, "GWht_TOTAL"] = GWht
+# BUILD ROW FOR MODEL
+row_data = {col: 0 for col in all_features}
+row_data["FACILITY_ID"] = 0
+row_data["REPORTING_YEAR"] = int(REPORTING_YEAR)
+row_data["PRIMARY_NAICS_CODE"] = int(NAICS)
+row_data["COGENERATION_UNIT_EMISS_IND"] = int(cogen)
+row_data["MMBtu_TOTAL"] = float(MMBtu)
+row_data["GWht_TOTAL"] = float(GWht)
 
 # set fuel type = 1
-if fuel_choice_col in row.columns:
-    row.at[0, fuel_choice_col] = 1
+if fuel_choice_col in row_data:
+    row_data[fuel_choice_col] = 1
+
+row = pd.DataFrame([row_data])
+
+# Ensure precise data types to match scaler and model expectations
+row = row.astype(float)
+row["FACILITY_ID"] = row["FACILITY_ID"].astype(int)
+row["REPORTING_YEAR"] = row["REPORTING_YEAR"].astype(int)
+row["PRIMARY_NAICS_CODE"] = row["PRIMARY_NAICS_CODE"].astype(int)
+row["COGENERATION_UNIT_EMISS_IND"] = row["COGENERATION_UNIT_EMISS_IND"].astype(int)
 
 
 # RUN DETECTION

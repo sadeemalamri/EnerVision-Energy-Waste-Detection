@@ -150,7 +150,7 @@ GWht = st.number_input(
 
 
 # BUILDING ROW FOR MODEL
-row = pd.DataFrame(columns=all_features)
+pd.DataFrame(columns=all_features, dtype=object)
 row.loc[0] = 0
 
 # Adding values into row
